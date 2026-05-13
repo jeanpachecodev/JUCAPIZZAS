@@ -6,7 +6,7 @@ require_once 'config/Database.php';
  
 echo "<h1>Testando Conexão e Modelo Pizza</h1>";
  
-$database = new Database();
+$database = new DB();
 $db = $database->getConnection();
  
 if (!$db) {

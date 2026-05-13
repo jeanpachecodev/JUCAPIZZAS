@@ -1,45 +1,32 @@
 <?php
-// CRIAÇÃO ROTA GET.PHP
-// Headers obrigatórios
+
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
- 
-// Incluir arquivos de banco de dados e modelo
-include_once '../../config/Database.php';
-include_once '../../models/Bebida.php';
- 
-// Instanciar o objeto Database e obter a conexão
-$database = new Database();
+include_once '../../config/db.php';
+include_once '../../models/bebidas.php';
+$database = new DB();
 $db = $database->getConnection();
- 
-if (!$db) {
-    //http_response_code(500);
-     header("HTTP/1.1 500 Internal Server Error");
-    echo json_encode(array("message" => "Erro de conexão com o banco de dados."));
-    exit;
-}
- 
-// Instanciar o objeto Bebida
-$bebida = new Bebida($db);
-$bebida->idBebida = isset($_GET['id']) ? (int) $_GET['id'] : 0;
- 
+$bebidas = new Bebidas($db);
+$bebidas->idbebidas = isset($_GET['id']) ? $_GET['id'] : null;
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    if ($bebida->idBebida > 0 && $bebida->get()) {
-        $bebida_arr = array(
-            "id" => $bebida->idBebida,
-            "nome" => $bebida->nome,
-            "tipo" => $bebida->tipo,
-            "valor" => $bebida->valor
+    if ($bebidas->idbebidas) {
+        $bebidas->get();
+        $bebidas_arr = array(
+            "id" => $bebidas->idbebidas,
+            "nome" => $bebidas->nome,
+            "tipo" => $bebidas->tipo,
+            "valor" => $bebidas->valor
         );
- 
-        echo json_encode($bebida_arr);
+        echo json_encode($bebidas_arr, JSON_PRETTY_PRINT);
     } else {
-        header("HTTP/1.1 404 Not Found");
-        echo json_encode(array("message" => "Bebida não encontrada."));
+        http_response_code(400);
+        echo json_encode(
+            array("Mensagem" => "Id não informado.")
+        );
     }
 } else {
-    header("HTTP/1.1 405 Method Not Allowed");
-    echo json_encode(array("message" => "Método não permitido."));
-     
-     
+    http_response_code(405);
+    echo json_encode(
+        array("Mensagem" => "Método não permitido.")
+    );
 }
